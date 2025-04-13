@@ -4,9 +4,9 @@ metadata:
   name: minikube-test
 spec:
   selector:
-    app: minikube-test
+    app: minikube-test   # Match the label defined in the deployment.yaml file
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: NodePort
+      port: 80             # Expose port 80 from the service
+      targetPort: 80       # Forward traffic to port 80 on the container
+  type: NodePort           # Expose the service to the outside world
