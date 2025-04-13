@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minikube-test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: minikube-test
+  template:
+    metadata:
+      labels:
+        app: minikube-test
+    spec:
+      containers:
+      - name: minikube-test
+        image: local/minikube-test:latest
+        ports:
+        - containerPort: 80
