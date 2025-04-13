@@ -14,6 +14,14 @@ spec:
     spec:
       containers:
       - name: minikube-test
-        image: local/minikube-test:latest
+        image: local/minikube-test:latest  # Use local image built inside Minikube
+        imagePullPolicy: Never             # Never pull the image from an external registry
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            cpu: 50m
+            memory: 100Mi
+          requests:
+            cpu: 25m
+            memory: 10Mi
