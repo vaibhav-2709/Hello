@@ -3,10 +3,10 @@ kind: Deployment
 metadata:
   name: minikube-test
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: minikube-test
+  replicas: 2
   template:
     metadata:
       labels:
@@ -14,14 +14,20 @@ spec:
     spec:
       containers:
       - name: minikube-test
-        image: local/minikube-test:latest  # Use local image built inside Minikube
-        imagePullPolicy: Never             # Never pull the image from an external registry
+        image: local/minikube-test:latest
         ports:
-        - containerPort: 80
-        resources:
-          limits:
-            cpu: 50m
-            memory: 100Mi
-          requests:
-            cpu: 25m
-            memory: 10Mi
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minikube-test
+spec:
+  selector:
+    app: minikube-test
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+
