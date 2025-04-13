@@ -1,32 +1,38 @@
-name: Minikube CI Test
-
+name: CI
 on:
   pull_request:
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  job1:
     runs-on: ubuntu-latest
+    name: Build example and deploy to Minikube
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        repository: medyagh/local-dev-example-with-minikube
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@latest
+    - name: Try the cluster!
+      run: kubectl get pods -A
+    - name: Build image
+      run: |
+        minikube image build -t local/minikube-test:latest .
+    - name: Deploy to Minikube
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+    - name: Wait for Pods to be Ready
+      run: |
+        kubectl wait --for=condition=ready pod -l app=minikube-test --timeout=300s
+    - name: Get Pod Logs (for debugging)
+      run: |
+        kubectl logs -l app=minikube-test
+    - name: Test service URLs
+      run: |
+        minikube service list
+        minikube service minikube-test --url
+        echo "------------------opening the service------------------"
+        curl $(minikube service minikube-test --url)
 
-      - name: Start Minikube
-        uses: medyagh/setup-minikube@latest
-
-      - name: Cluster Check
-        run: kubectl get nodes
-
-      - name: Build Docker Image in Minikube
-        run: minikube image build -t local/minikube-test:latest .
-
-      - name: Deploy to Minikube
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl wait --for=condition=ready pod -l app=minikube-test --timeout=90s
-
-      - name: Access service via curl
-        run: |
-          echo "Service URL:"
-          minikube service minikube-test --url
-          curl $(minikube service minikube-test --url)
