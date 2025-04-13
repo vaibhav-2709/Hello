@@ -1,8 +1,8 @@
-# Use the official Nginx image to serve the HTML page
+# Use an official nginx image to serve the app
 FROM nginx:alpine
 
-# Copy index.html into the default Nginx html directory
-COPY index.html /usr/share/nginx/html/index.html
+# Copy the HTML files into the nginx directory
+COPY index.html /usr/share/nginx/html
 
-# Expose port 80 to access the web server
+# Expose port 80
 EXPOSE 80
