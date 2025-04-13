@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   job1:
@@ -12,13 +12,19 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: medyagh/local-dev-example-with-minikube
-    - name: Start Minikube
+    - name: Set up Minikube
       uses: medyagh/setup-minikube@latest
-    - name: Try the cluster!
-      run: kubectl get pods -A
-    - name: Build image
+      with:
+        minikube-version: "latest"  # Ensuring we use the latest version of Minikube
+    - name: Start Minikube Cluster
       run: |
-        minikube image build -t local/minikube-test:latest .
+        minikube start --driver=docker  # Make sure Minikube starts correctly
+    - name: Verify Minikube Cluster
+      run: kubectl get nodes  # Verify that the nodes are up and running
+    - name: Build Docker Image
+      run: |
+        eval $(minikube -p minikube docker-env)  # Set Docker environment for Minikube
+        docker build -t local/minikube-test:latest .  # Build the Docker image inside Minikube's Docker daemon
     - name: Deploy to Minikube
       run: |
         kubectl apply -f k8s/deployment.yaml
@@ -31,8 +37,8 @@ jobs:
         kubectl logs -l app=minikube-test
     - name: Test service URLs
       run: |
-        minikube service list
-        minikube service minikube-test --url
-        echo "------------------opening the service------------------"
-        curl $(minikube service minikube-test --url)
+        minikube service list  # List all services in Minikube
+        SERVICE_URL=$(minikube service minikube-test --url)  # Get the URL of your service
+        echo "Service URL: $SERVICE_URL"
+        curl $SERVICE_URL  # Test the service by making a request
 
